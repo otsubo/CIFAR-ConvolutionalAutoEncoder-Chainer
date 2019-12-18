@@ -19,7 +19,8 @@ from chainer import dataset
 import numpy as np
 from sklearn.model_selection import train_test_split
 from skimage.io import imread
-import network
+from skimage.transform import resize
+import network_deep
 
 # Load data
 class LoadDataset(dataset.DatasetMixin):
@@ -37,7 +38,7 @@ class LoadDataset(dataset.DatasetMixin):
     def _get_ids(self):
         ids = []
         dataset_dir = chainer.dataset.get_dataset_directory(
-            '2019_11_28_pr2')
+            '2019_12_03')
         for data_id in os.listdir(dataset_dir):
             ids.append(osp.join(dataset_dir , data_id))
         return ids
@@ -53,6 +54,7 @@ class LoadDataset(dataset.DatasetMixin):
         id = self.ids[i]
         image_file = osp.join(id , "image.png")
         img = imread(image_file)
+        img = resize(img, (50 , 50))
         datum = self.img_to_datum(img)
         if self._return_image:
             return img
@@ -64,9 +66,9 @@ def main():
     parser.add_argument('--gpu', '-g', type=int, default=-1)
     parser.add_argument('--model', '-m', type=str, default=None)
     parser.add_argument('--opt', type=str, default=None)
-    parser.add_argument('--epoch', '-e', type=int, default=20)
+    parser.add_argument('--epoch', '-e', type=int, default=50)
     parser.add_argument('--lr', '-l', type=float, default=0.001)
-    parser.add_argument('--batch', '-b', type=int, default=32)
+    parser.add_argument('--batch', '-b', type=int, default=1)
     parser.add_argument('--noplot', dest='plot', action='store_false')
     args = parser.parse_args()
 
@@ -78,7 +80,7 @@ def main():
     test_iter = iterators.SerialIterator(test, batch_size=args.batch, repeat=False, shuffle=False)
     
     # Define model
-    model = network.CAE(3,3)
+    model = network_deep.TmpCAE(3,3)
     
     # Load weight
     if args.model != None:

@@ -88,12 +88,14 @@ def main():
     plt.axis('off')
     plt.tight_layout()
     
-    pbar = tqdm(total=32)
-    for i in range(4):
-        for j in range(8):
-            ax = fig.add_subplot(8, 8, i*16+j+1, xticks=[], yticks=[])
-            x, t = test[i*8+j]
+    pbar = tqdm(total=8)
+    #import ipdb; ipdb.set_trace()
+    for i in range(2):
+        for j in range(2):
+            ax = fig.add_subplot(4, 2, i*4+j+1, xticks=[], yticks=[])
+            x, t = test[i*2+j]
             xT = x.transpose(1, 2, 0)
+            xT = xT.astype(np.uint8)
             ax.imshow(xT, cmap=plt.cm.bone, interpolation='nearest')
             
             x = np.expand_dims(x, 0)
@@ -113,7 +115,7 @@ def main():
             predicted = cuda.to_cpu(predicted.data) #Variable to numpy
             predicted = predicted * 255
             predicted = predicted.astype(np.uint8) 
-            ax = fig.add_subplot(8, 8, i*16+j+9, xticks=[], yticks=[])
+            ax = fig.add_subplot(4, 2, i*4+j+3, xticks=[], yticks=[])
             ax.imshow(predicted, cmap=plt.cm.bone, interpolation='nearest')
 
             pbar.update(1)
