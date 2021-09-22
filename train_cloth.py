@@ -38,7 +38,7 @@ class LoadDataset(dataset.DatasetMixin):
     def _get_ids(self):
         ids = []
         dataset_dir = chainer.dataset.get_dataset_directory(
-            '2019_12_03')
+            'test')
         for data_id in os.listdir(dataset_dir):
             ids.append(osp.join(dataset_dir , data_id))
         return ids
@@ -54,7 +54,7 @@ class LoadDataset(dataset.DatasetMixin):
         id = self.ids[i]
         image_file = osp.join(id , "image.png")
         img = imread(image_file)
-        img = resize(img, (50 , 50))
+        #img = resize(img, (50 , 50))
         datum = self.img_to_datum(img)
         if self._return_image:
             return img
@@ -80,7 +80,7 @@ def main():
     test_iter = iterators.SerialIterator(test, batch_size=args.batch, repeat=False, shuffle=False)
     
     # Define model
-    model = network_deep.TmpCAE(3,3)
+    model = network_deep.CAE(3,3)
     
     # Load weight
     if args.model != None:

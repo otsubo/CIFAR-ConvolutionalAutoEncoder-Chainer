@@ -22,9 +22,10 @@ class CAE(chainer.Chain):
                 conv2 = L.Convolution2D(32, 64, 1 , 1, 1),
                 conv3 = L.Convolution2D(64, 128, 1, 1, 1),
                 conv4 = L.Convolution2D(128, 256, 1, 1, 1),
-                # l1 = L.Linear(None, 1000),
-                # l2 = L.Linear(1000, 50),
-                # dconv1 = L.Linear(50, 1000),
+                l1 = L.Linear(None, 1000),
+                l2 = L.Linear(1000, 50),
+                dconv1 = L.Linear(50, 1000),
+                dconv_mid = L.Linear(1000, 95744),
                 dconv2 = L.Convolution2D(1000, 256, pad=1),
                 dconv3 = L.Convolution2D(256, 128, pad=1),
                 dconv4 = L.Convolution2D(128, 64, pad=1),
@@ -43,16 +44,17 @@ class CAE(chainer.Chain):
         e = F.relu(self.conv3(e))
         e = F.max_pooling_2d(e,ksize=2, stride=2,)
         e = F.relu(self.conv4(e))
-        e_out = F.max_pooling_2d(e,ksize=2, stride=2,)
-        # e = F.relu(self.l1(e))
-        # e_out = F.relu(self.l2(e))
+        e = F.max_pooling_2d(e,ksize=2, stride=2,)
+        e = F.relu(self.l1(e))
+        e_out = F.relu(self.l2(e))
 
         # Decoder
-        # de = F.relu(self.dconv1(e_out))
-        # de = F.relu(self.dconv2(de))
-        de = F.relu(self.dconv2(e_out))
-        de = F.unpooling_2d(de, ksize=2, stride=2, cover_all=False)
-        de = F.relu(self.dconv3(de))
+        de = F.relu(self.dconv1(e_out))
+        de = F.relu(self.dconv_mid(de))
+        #de = F.relu(self.dconv2(e_out))
+        # de = F.relu(self.dconv2(de.respahe(1, 256, 22, 17))
+        # de = F.unpooling_2d(de, ksize=2, stride=2, cover_all=False)
+        de = F.relu(self.dconv3(de.reshape(1, 256, 22, 17)))
         de = F.unpooling_2d(de, ksize=2, stride=2, cover_all=False)
         de = F.relu(self.dconv4(de))
         de = F.unpooling_2d(de, ksize=2, stride=2, cover_all=False)
@@ -92,13 +94,14 @@ class TmpCAE(chainer.Chain):
         e_out = F.relu(self.conv3(e))
 
         # Decoder
-        # de = F.relu(self.dconv1(e_out))
-        # de = F.relu(self.dconv2(de))
+        de = F.relu(self.dconv1(e_out))
+        de = F.relu(self.dconv2(de))
         de = F.relu(self.dconv1(e_out))
         de = F.unpooling_2d(de, ksize=2, stride=2, cover_all=False)
         de = F.relu(self.dconv2(de))
         de = F.unpooling_2d(de, ksize=2, stride=2, cover_all=False)
         out = F.relu(self.dconv3(de))
+        import ipdb; ipdb.set_trace()
         out = out.reshape(x.shape)
 
         loss = F.mean_squared_error(out,t)
